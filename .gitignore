@@ -1,0 +1,6 @@
+# buildディレクトリ
+build/*
+!build/.gitkeep
+
+# 実行ファイル
+*.exe
