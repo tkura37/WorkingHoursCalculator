@@ -6,6 +6,7 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "WorkingHoursCalculator.h"
 
 /** @brief 時刻をマクロ定義から構造体メンバへ変換 */
@@ -29,6 +30,20 @@ int parseTime(const char *timeStr, Time *time)
     return parseResult;
 }
 
+/** @brief Timeオブジェクト同士の時刻比較 */
+bool isEarlierThan(Time time1, Time time2)
+{
+    if (time1.hours < time2.hours)
+    {
+        return true;
+    }
+    else if (time1.hours == time2.hours && time1.minutes <= time2.minutes)
+    {
+        return true;
+    }
+    return false;
+}
+
 /** @brief 休憩時間の計算 */
 Time calculateBreakTime(Time end)
 {
@@ -44,13 +59,18 @@ Time calculateBreakTime(Time end)
     parseTime(STANDARD_END_TIME, &standardEndTime);
     parseTime(OVERTIME_START_TIME, &overtimeStartTime);
 
-    /* 昼休み終了時刻前に退勤した場合：休憩時間を0分で出力 */
-    if (end.hours < lunchbreakEndTime.hours || (end.hours == lunchbreakEndTime.hours && end.minutes <= lunchbreakEndTime.minutes))
+    /* 昼休み開始時刻前に退勤した場合：休憩時間を0分で出力 */
+    if (isEarlierThan(end, lunchbreakStartTime))
     {
         return breakTime;
     }
-    /* 残業開始時刻前に退勤した場合：標準の休憩時間を出力 */
-    else if(end.hours < overtimeStartTime.hours || (end.hours == overtimeStartTime.hours && end.minutes <= overtimeStartTime.minutes))
+    /* 昼休み終了時刻前に退勤した場合：休憩時間を0分で出力 */
+    else if (isEarlierThan(end, lunchbreakEndTime))
+    {
+        return breakTime;
+    }
+    /* 定時前or定時に退勤した場合：昼のみの休憩時間を出力 */
+    else if (isEarlierThan(end, standardEndTime))
     {
         breakTime.hours     = lunchbreakEndTime.hours - lunchbreakStartTime.hours;
         breakTime.minutes   = lunchbreakEndTime.minutes - lunchbreakStartTime.minutes;
@@ -60,8 +80,20 @@ Time calculateBreakTime(Time end)
             breakTime.minutes += 60;
         }
     }
+    /* 残業開始時刻前に退勤した場合：昼のみの休憩時間を出力 */
+    else if(isEarlierThan(end, overtimeStartTime))
+    {
+        breakTime.hours     = lunchbreakEndTime.hours - lunchbreakStartTime.hours;
+        breakTime.minutes   = lunchbreakEndTime.minutes - lunchbreakStartTime.minutes;
+
+        if (breakTime.minutes < 0)
+        {
+            breakTime.hours -= 1;
+            breakTime.minutes += 60;
+        }
+    }
     /* 残業開始時刻以降に退勤した場合：残業時の休憩時間を出力 */
-    else if (end.hours > overtimeStartTime.hours || (end.hours == overtimeStartTime.hours && end.minutes > overtimeStartTime.minutes))
+    else
     {
         breakTime.hours     = lunchbreakEndTime.hours - lunchbreakStartTime.hours;
         breakTime.minutes   = lunchbreakEndTime.minutes - lunchbreakStartTime.minutes;
@@ -79,9 +111,6 @@ Time calculateBreakTime(Time end)
             breakTime.minutes += 60;
         }
     }
-    else
-    {
-    }
     return breakTime;
 }
 
@@ -92,11 +121,13 @@ Time calculateOverTime(Time start, Time end, Time breakTime)
 
     Time lunchbreakStartTime;
     Time lunchbreakEndTime;
+    Time standardEndTime;
     Time overtimeStartTime;
     Time standardWorkTime;
 
     parseTime(LUNCHBREAK_START_TIME, &lunchbreakStartTime);
     parseTime(LUNCHBREAK_END_TIME, &lunchbreakEndTime);
+    parseTime(STANDARD_END_TIME, &standardEndTime);
     parseTime(OVERTIME_START_TIME, &overtimeStartTime);
     parseTime(STANDARD_WORK_HOURS, &standardWorkTime);
 
@@ -105,22 +136,27 @@ Time calculateOverTime(Time start, Time end, Time breakTime)
     int overTimeMinutes;        /* 残業時間(分) */
     standardWorkMinutes = standardWorkTime.hours * 60 + standardWorkTime.minutes;
     
-    /* 昼休み開始時刻前に退勤した場合 */
-    if (end.hours < lunchbreakStartTime.hours || (end.hours == lunchbreakStartTime.hours && end.minutes <= lunchbreakStartTime.minutes))
+    /* 昼休み開始時刻前に退勤した場合：残業時間をマイナスで出力 */
+    if (isEarlierThan(end, lunchbreakStartTime))
     {
         totalWorkMinutes = (end.hours * 60 + end.minutes) - (start.hours * 60 + start.minutes);
     }
-    /* 昼休み終了時刻前に退勤した場合：昼休み開始時刻に退勤したとみなす */
-    else if (end.hours < lunchbreakEndTime.hours || (end.hours == lunchbreakEndTime.hours && end.minutes <= lunchbreakEndTime.minutes))
+    /* 昼休み終了時刻前に退勤した場合：昼休み開始時刻に退勤したとみなす 残業時間をマイナスで出力 */
+    else if (isEarlierThan(end, lunchbreakEndTime))
     {
         totalWorkMinutes = (lunchbreakStartTime.hours * 60 + lunchbreakStartTime.minutes) - (start.hours * 60 + start.minutes);
     }
-    /* 定時後の休憩中に退勤した場合：残業時間を0にする */
-    else if (end.hours == overtimeStartTime.hours && end.minutes <= overtimeStartTime.minutes)
+    /* 定時前or定時に退勤した場合：残業時間をマイナスor0で出力 */
+    else if (isEarlierThan(end, standardEndTime))
+    {
+        totalWorkMinutes = (end.hours * 60 + end.minutes) - (start.hours * 60 + start.minutes) - (breakTime.hours * 60 + breakTime.minutes);
+    }
+    /* 残業開始時刻前に退勤した場合：残業時間を0で出力 */
+    else if(isEarlierThan(end, overtimeStartTime))
     {
         return overTime;
     }
-    /* 昼休み後に早退 or 残業した場合 */
+    /* 残業開始時刻以降に退勤した場合：残業時時間を出力 */
     else
     {
         totalWorkMinutes = (end.hours * 60 + end.minutes) - (start.hours * 60 + start.minutes) - (breakTime.hours * 60 + breakTime.minutes);
@@ -128,6 +164,7 @@ Time calculateOverTime(Time start, Time end, Time breakTime)
     overTimeMinutes = totalWorkMinutes - standardWorkMinutes;
     overTime.hours = overTimeMinutes / 60;
     overTime.minutes = abs(overTimeMinutes % 60);
+    
     return overTime;
 }
 
