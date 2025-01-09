@@ -195,7 +195,7 @@ int main(int argc, char *argv[])
     }
 
     /* 退勤時間が出勤時間よりも先の場合、エラーを出力 */
-    if((end.hours < start.hours) || (end.hours == start.hours && end.minutes < start.minutes))
+    if(isEarlierThan(end, start))
     {
         fprintf(stderr, "usage: ./WorkingHoursCalculator 8:30 17:00\n");
         return 1;
