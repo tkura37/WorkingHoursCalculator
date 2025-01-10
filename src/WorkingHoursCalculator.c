@@ -30,6 +30,12 @@ int parseTime(const char *timeStr, Time *time)
     return parseResult;
 }
 
+/** @brief Timeオブジェクトを分に変換 */
+int toMinutes(Time time)
+{
+    return time.hours * 60 + time.minutes;
+}
+
 /** @brief Timeオブジェクト同士の時刻比較 */
 bool isEarlierThan(Time time1, Time time2)
 {
@@ -134,22 +140,22 @@ Time calculateOverTime(Time start, Time end, Time breakTime)
     int standardWorkMinutes;    /* 標準勤務時間(分) */
     int totalWorkMinutes;       /* 実際の勤務時間(分) */
     int overTimeMinutes;        /* 残業時間(分) */
-    standardWorkMinutes = standardWorkTime.hours * 60 + standardWorkTime.minutes;
+    standardWorkMinutes = toMinutes(standardWorkTime);
     
     /* 昼休み開始時刻前に退勤した場合：残業時間をマイナスで出力 */
     if (isEarlierThan(end, lunchbreakStartTime))
     {
-        totalWorkMinutes = (end.hours * 60 + end.minutes) - (start.hours * 60 + start.minutes);
+        totalWorkMinutes = toMinutes(end) - toMinutes(start);
     }
     /* 昼休み終了時刻前に退勤した場合：昼休み開始時刻に退勤したとみなす 残業時間をマイナスで出力 */
     else if (isEarlierThan(end, lunchbreakEndTime))
     {
-        totalWorkMinutes = (lunchbreakStartTime.hours * 60 + lunchbreakStartTime.minutes) - (start.hours * 60 + start.minutes);
+        totalWorkMinutes = toMinutes(lunchbreakStartTime) - toMinutes(start);
     }
     /* 定時前or定時に退勤した場合：残業時間をマイナスor0で出力 */
     else if (isEarlierThan(end, standardEndTime))
     {
-        totalWorkMinutes = (end.hours * 60 + end.minutes) - (start.hours * 60 + start.minutes) - (breakTime.hours * 60 + breakTime.minutes);
+        totalWorkMinutes = toMinutes(end) - toMinutes(start) - toMinutes(breakTime);
     }
     /* 残業開始時刻前に退勤した場合：残業時間を0で出力 */
     else if(isEarlierThan(end, overtimeStartTime))
@@ -159,7 +165,7 @@ Time calculateOverTime(Time start, Time end, Time breakTime)
     /* 残業開始時刻以降に退勤した場合：残業時時間を出力 */
     else
     {
-        totalWorkMinutes = (end.hours * 60 + end.minutes) - (start.hours * 60 + start.minutes) - (breakTime.hours * 60 + breakTime.minutes);
+        totalWorkMinutes = toMinutes(end) - toMinutes(start) - toMinutes(breakTime);
     }
     overTimeMinutes = totalWorkMinutes - standardWorkMinutes;
     overTime.hours = overTimeMinutes / 60;
@@ -169,11 +175,11 @@ Time calculateOverTime(Time start, Time end, Time breakTime)
 }
 
 /** @brief 時間の出力 */
-void printResult(const char *outputLabel, const Time *time)
+void printResult(const char *outputLabel, const Time time)
 {
     printf("%s", outputLabel);
-    printf("%d時間%02d分", time->hours, abs(time->minutes));
-    printf(" (%.2f)\n", (time->hours * 60 + time->minutes) / 60.0);
+    printf("%d時間%02d分", time.hours, abs(time.minutes));
+    printf(" (%.2f)\n", toMinutes(time) / 60.0);
 }
 
 #ifndef TESTING
@@ -208,8 +214,8 @@ int main(int argc, char *argv[])
     Time overTime = calculateOverTime(start, end, breakTime);
 
     /* 休憩時間と残業時間の出力 */
-    printResult("休憩時間: ", &breakTime);
-    printResult("残業時間: ", &overTime);
+    printResult("休憩時間: ", breakTime);
+    printResult("残業時間: ", overTime);
 
     return 0;
 }
