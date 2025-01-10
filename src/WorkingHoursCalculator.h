@@ -31,6 +31,7 @@ typedef struct {
 
 /* プロトタイプ宣言 */
 int parseTime(const char *timeStr, Time *time);
+bool isEarlierThan(Time time1, Time time2);
 Time calculateBreakTime(Time end);
 Time calculateOverTime(Time start, Time end, Time breakTime);
 void printResult(const char *outputLabel, const Time *time);
