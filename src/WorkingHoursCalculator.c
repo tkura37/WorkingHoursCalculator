@@ -16,7 +16,12 @@ int parseTime(const char *timeStr, Time *time)
     {
         return 1;
     }
+
+    time->hours = 0;
+    time->minutes = 0;
+
     int parseResult = sscanf(timeStr, "%d:%d", &time->hours, &time->minutes);
+
     /* 時：0～23のみ有効 */
     if (time->hours < 0 || time->hours > 23)
     {
@@ -77,7 +82,6 @@ Time addTime(Time timeA, Time timeB)
 
     return timeSum;
 }
-
 
 /** @brief Timeオブジェクトを分に変換 */
 int toMinutes(Time time)
