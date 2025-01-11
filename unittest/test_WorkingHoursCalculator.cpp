@@ -9,8 +9,10 @@ protected:
 
     void TearDown() override {
     }
+};
 
-    /* parseTime()のテストINPUT・OUTPUT */
+/* parseTime()のテスト */
+TEST_F(WorkingHoursCalculatorTest, Test_parseTime) {
     struct TestCase_parseTime {
         const char *timeStr;
         int expectedParseResult;
@@ -23,7 +25,18 @@ protected:
         {"abcd", 0, {0, 0}},        /* 不正なフォーマット */
     };
 
-    /* calculateBreakTime()とcalculateOverTime()のテストINPUT・OUTPUT */
+    for (const auto& testCase : testCases_parseTime) {
+        Time time;
+        int parseResult = parseTime(testCase.timeStr, &time);
+
+        EXPECT_EQ(parseResult, testCase.expectedParseResult)    << "  Failed for input: " << testCase.timeStr;
+        EXPECT_EQ(time.hours, testCase.expectedTime.hours)      << "  Failed for input: " << testCase.timeStr;
+        EXPECT_EQ(time.minutes, testCase.expectedTime.minutes)  << "  Failed for input: " << testCase.timeStr;
+    }
+}
+
+/* calculateBreakTime()とcalculateOverTime() のテスト */
+TEST_F(WorkingHoursCalculatorTest, Test_BreakAndOverTime) {
     struct TestCase_BreakAndOverTime {
         Time startTime;
         Time endTime;
@@ -39,22 +52,7 @@ protected:
         {{8, 30}, {17, 15}, {0, 45}, {0, 0}},   /* 残業開始時刻に退勤 */
         {{8, 30}, {18, 15}, {1, 0}, {1, 0}},    /* 残業して退勤 */
     };
-};
 
-/* parseTime()のテスト */
-TEST_F(WorkingHoursCalculatorTest, Test_parseTime) {
-    for (const auto& testCase : testCases_parseTime) {
-        Time time;
-        int parseResult = parseTime(testCase.timeStr, &time);
-
-        EXPECT_EQ(parseResult, testCase.expectedParseResult)    << "  Failed for input: " << testCase.timeStr;
-        EXPECT_EQ(time.hours, testCase.expectedTime.hours)      << "  Failed for input: " << testCase.timeStr;
-        EXPECT_EQ(time.minutes, testCase.expectedTime.minutes)  << "  Failed for input: " << testCase.timeStr;
-    }
-}
-
-/* calculateBreakTime()とcalculateOverTime() のテスト */
-TEST_F(WorkingHoursCalculatorTest, Test_BreakAndOverTime) {
     for (const auto& testCase : testCases_BreakAndOverTime) {
         Time calculatedBreakTime = calculateBreakTime(testCase.endTime);
         Time calculatedOverTime = calculateOverTime(testCase.startTime, testCase.endTime, calculatedBreakTime);
