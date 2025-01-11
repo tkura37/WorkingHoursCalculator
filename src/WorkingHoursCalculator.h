@@ -31,8 +31,10 @@ typedef struct {
 
 /* プロトタイプ宣言 */
 int parseTime(const char *timeStr, Time *time);
-int toMinutes(Time time);
 bool isEarlierThan(Time time1, Time time2);
+Time subtractTime(Time timeA, Time timeB);
+Time addTime(Time timeA, Time timeB);
+int toMinutes(Time time);
 Time calculateBreakTime(Time end);
 Time calculateOverTime(Time start, Time end, Time breakTime);
 void printResult(const char *outputLabel, const Time time);

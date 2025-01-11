@@ -30,12 +30,6 @@ int parseTime(const char *timeStr, Time *time)
     return parseResult;
 }
 
-/** @brief Timeオブジェクトを分に変換 */
-int toMinutes(Time time)
-{
-    return time.hours * 60 + time.minutes;
-}
-
 /** @brief Timeオブジェクト同士の時刻比較 */
 bool isEarlierThan(Time time1, Time time2)
 {
@@ -48,6 +42,47 @@ bool isEarlierThan(Time time1, Time time2)
         return true;
     }
     return false;
+}
+
+/** @brief Timeオブジェクト同士の差分計算(timeA - timeB) */
+Time subtractTime(Time timeA, Time timeB)
+{
+    Time timeDiff;
+
+    timeDiff.hours   = timeA.hours - timeB.hours;
+    timeDiff.minutes = timeA.minutes - timeB.minutes;
+
+    if (timeDiff.minutes < 0)
+    {
+        timeDiff.hours   -= 1;
+        timeDiff.minutes += 60;
+    }
+
+    return timeDiff;
+}
+
+/** @brief Timeオブジェクト同士の合計計算(timeA + timeB) */
+Time addTime(Time timeA, Time timeB)
+{
+    Time timeSum;
+
+    timeSum.hours   = timeA.hours + timeB.hours;
+    timeSum.minutes = timeA.minutes + timeB.minutes;
+
+    if (timeSum.minutes >= 0)
+    {
+        timeSum.hours   += 1;
+        timeSum.minutes -= 60;
+    }
+
+    return timeSum;
+}
+
+
+/** @brief Timeオブジェクトを分に変換 */
+int toMinutes(Time time)
+{
+    return time.hours * 60 + time.minutes;
 }
 
 /** @brief 休憩時間の計算 */
@@ -78,44 +113,22 @@ Time calculateBreakTime(Time end)
     /* 定時前or定時に退勤した場合：昼のみの休憩時間を出力 */
     else if (isEarlierThan(end, standardEndTime))
     {
-        breakTime.hours     = lunchbreakEndTime.hours - lunchbreakStartTime.hours;
-        breakTime.minutes   = lunchbreakEndTime.minutes - lunchbreakStartTime.minutes;
-        if (breakTime.minutes < 0)
-        {
-            breakTime.hours -= 1;
-            breakTime.minutes += 60;
-        }
+        breakTime = subtractTime(lunchbreakEndTime, lunchbreakStartTime);
     }
     /* 残業開始時刻前に退勤した場合：昼のみの休憩時間を出力 */
     else if(isEarlierThan(end, overtimeStartTime))
     {
-        breakTime.hours     = lunchbreakEndTime.hours - lunchbreakStartTime.hours;
-        breakTime.minutes   = lunchbreakEndTime.minutes - lunchbreakStartTime.minutes;
-
-        if (breakTime.minutes < 0)
-        {
-            breakTime.hours -= 1;
-            breakTime.minutes += 60;
-        }
+        breakTime = subtractTime(lunchbreakEndTime, lunchbreakStartTime);        
     }
     /* 残業開始時刻以降に退勤した場合：残業時の休憩時間を出力 */
     else
     {
-        breakTime.hours     = lunchbreakEndTime.hours - lunchbreakStartTime.hours;
-        breakTime.minutes   = lunchbreakEndTime.minutes - lunchbreakStartTime.minutes;
+        breakTime = subtractTime(lunchbreakEndTime, lunchbreakStartTime);      
 
         Time overtimeBreakTime;
-        overtimeBreakTime.hours     = overtimeStartTime.hours - standardEndTime.hours;
-        overtimeBreakTime.minutes   = overtimeStartTime.minutes - standardEndTime.minutes;
+        overtimeBreakTime = subtractTime(overtimeStartTime, standardEndTime);   
         
-        breakTime.hours     += overtimeBreakTime.hours;
-        breakTime.minutes   += overtimeBreakTime.minutes;
-        
-        if (breakTime.minutes < 0)
-        {
-            breakTime.hours -= 1;
-            breakTime.minutes += 60;
-        }
+        breakTime = addTime(breakTime, overtimeBreakTime);
     }
     return breakTime;
 }
