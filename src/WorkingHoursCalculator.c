@@ -36,13 +36,13 @@ int parseTime(const char *timeStr, Time *time)
 }
 
 /** @brief Timeオブジェクト同士の時刻比較 */
-bool isEarlierThan(Time time1, Time time2)
+bool isEarlierThan(Time timeA, Time timeB)
 {
-    if (time1.hours < time2.hours)
+    if (timeA.hours < timeB.hours)
     {
         return true;
     }
-    else if (time1.hours == time2.hours && time1.minutes <= time2.minutes)
+    else if (timeA.hours == timeB.hours && timeA.minutes <= timeB.minutes)
     {
         return true;
     }
