@@ -69,7 +69,7 @@ Time addTime(Time timeA, Time timeB)
     timeSum.hours   = timeA.hours + timeB.hours;
     timeSum.minutes = timeA.minutes + timeB.minutes;
 
-    if (timeSum.minutes >= 0)
+    if (timeSum.minutes >= 60)
     {
         timeSum.hours   += 1;
         timeSum.minutes -= 60;
