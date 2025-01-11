@@ -35,6 +35,27 @@ TEST_F(WorkingHoursCalculatorTest, Test_parseTime) {
     }
 }
 
+/* isEarlierThan()のテスト */
+TEST_F(WorkingHoursCalculatorTest, Test_isEarlierThan) {
+    struct TestCase_isEarlierThan {
+        Time timeA;
+        Time timeB;
+        bool expectedResult;
+    };
+    std::vector<TestCase_isEarlierThan> testCases_isEarlierThan = {
+        {{8, 30}, {9, 0}, true},    /* timeA.hours < timeB.hours */
+        {{9, 0}, {8, 30}, false},   /* timeA.hours > timeB.hours */
+        {{8, 30}, {8, 30}, true},   /* timeA.hours == timeB.hours && timeA.minutes = timeB.minutes */
+        {{12, 0}, {12, 30}, true},  /* timeA.hours == timeB.hours && timeA.minutes < timeB.minutes */
+        {{12, 30}, {12, 0}, false}, /* timeA.hours == timeB.hours && timeA.minutes > timeB.minutes */
+    };
+
+    for (const auto& testCase : testCases_isEarlierThan) {
+        bool result = isEarlierThan(testCase.timeA, testCase.timeB);
+        EXPECT_EQ(result, testCase.expectedResult) << "  Failed for input: " << testCase.timeA.hours << ":" << testCase.timeA.minutes << " and " << testCase.timeB.hours << ":" << testCase.timeB.minutes;
+    }
+}
+
 /* calculateBreakTime()とcalculateOverTime() のテスト */
 TEST_F(WorkingHoursCalculatorTest, Test_BreakAndOverTime) {
     struct TestCase_BreakAndOverTime {
