@@ -55,7 +55,7 @@ jobs:
     - name: Save Coverage Badge
       run: |
         mkdir -p badges
-        cp CoverageReport/badge_combined.svg badges/
+        cp CoverageReport/badge_linecoverage.svg badges/
 
     - name: Push Coverage Badge To Badges Branch
       uses: s0/git-publish-subdir-action@master
