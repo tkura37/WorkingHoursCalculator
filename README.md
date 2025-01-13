@@ -1,5 +1,5 @@
 [![GoogleTest CI](https://github.com/tkura37/WorkingHoursCalculator/actions/workflows/GoogleTest-CI.yml/badge.svg)](https://github.com/tkura37/WorkingHoursCalculator/actions/workflows/GoogleTest-CI.yml)
-![Coverage](https://github.com/tkura37/WorkingHoursCalculator/blob/badges/badge_combined.svg)
+![Coverage](https://github.com/tkura37/WorkingHoursCalculator/blob/badges/badge_linecoverage.svg)
 # 休憩時間・残業時間計算プログラム
 ## 概要
 - 入力された出勤時間と退勤時間から、休憩時間と残業時間を計算して出力するプログラム
