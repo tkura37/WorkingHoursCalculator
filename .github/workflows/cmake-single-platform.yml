@@ -1,4 +1,4 @@
-name: CMake on Linux
+name: GoogleTest CI
 
 on:
   push:
