@@ -29,13 +29,13 @@ jobs:
 
     - name: Execute gcov
       run: |
-        cd ${{github.workspace}}/build/gcov
+        cd ${{github.workspace}}/build/CMakeFiles/workinghours_calculator_test.dir/unittest
         gcov *.gcda
 
     - name: Generate Coverage Report
       uses: danielpalme/ReportGenerator-GitHub-Action@5.2.0
       with:
-        reports: ${{github.workspace}}/build/gcov/*.gcov
+        reports: ${{github.workspace}}/build/CMakeFiles/workinghours_calculator_test.dir/unittest/*.gcov
         targetdir: CoverageReport
         reporttypes: Html;MarkdownSummaryGithub;Badges
 
@@ -43,7 +43,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: coverage-report
-        path: ${{github.workspace}}/build/gcov/CoverageReport
+        path: ./CoverageReport
 
     - name: Add Coverage Report To PR Comment
       uses: marocchino/sticky-pull-request-comment@v2
