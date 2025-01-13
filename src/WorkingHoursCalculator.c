@@ -12,14 +12,6 @@
 /** @brief 時刻をマクロ定義から構造体メンバへ変換 */
 int parseTime(const char *timeStr, Time *time)
 {
-    if(timeStr == NULL || time == NULL)
-    {
-        return 1;
-    }
-
-    time->hours = 0;
-    time->minutes = 0;
-
     int parseResult = sscanf(timeStr, "%d:%d", &time->hours, &time->minutes);
 
     /* 時：0～23のみ有効 */

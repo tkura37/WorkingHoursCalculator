@@ -26,7 +26,7 @@ TEST_F(WorkingHoursCalculatorTest, Test_parseTime) {
     };
 
     for (const auto& testCase : testCases_parseTime) {
-        Time time;
+        Time time = {0, 0};
         int parseResult = parseTime(testCase.timeStr, &time);
 
         EXPECT_EQ(parseResult, testCase.expectedParseResult)    << "  Failed for input: " << testCase.timeStr;
