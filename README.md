@@ -1,4 +1,4 @@
-[![GoogleTest](https://github.com/tkura37/WorkingHoursCalculator/actions/workflows/cmake-single-platform.yml/badge.svg)]
+[![GoogleTest CI](https://github.com/tkura37/WorkingHoursCalculator/actions/workflows/cmake-single-platform.yml/badge.svg)](https://github.com/tkura37/WorkingHoursCalculator/actions/workflows/cmake-single-platform.yml)
 # 休憩時間・残業時間計算プログラム
 ## 概要
 - 入力された出勤時間と退勤時間から、休憩時間と残業時間を計算して出力するプログラム
