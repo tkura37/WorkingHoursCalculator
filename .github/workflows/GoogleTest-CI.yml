@@ -25,7 +25,7 @@ jobs:
     - name: Test
       run: |
         cd ${{github.workspace}}/build
-        ctest
+        ./workinghours_calculator_test
 
     - name: Execute gcov
       run: |
