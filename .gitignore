@@ -1,6 +1,12 @@
 # buildディレクトリ
 build/*
 !build/.gitkeep
+!build/gcov
+build/gcov/*
+!build/gcov/.gitkeep
+!build/gcov/CoverageReport
+build/gcov/CoverageReport/*
+!build/gcov/CoverageReport/.gitkeep
 
 # 実行ファイル
 *.exe
