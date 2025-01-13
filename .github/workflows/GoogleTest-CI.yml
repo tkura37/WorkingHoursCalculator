@@ -51,3 +51,16 @@ jobs:
       with:
         recreate: true
         path: CoverageReport/SummaryGithub.md
+
+    - name: Save Coverage Badge
+      run: |
+        mkdir -p badges
+        cp CoverageReport/badge_combined.svg badges/
+
+    - name: Push Coverage Badge To Badges Branch
+      uses: s0/git-publish-subdir-action@master
+      env:
+        REPO: self
+        BRANCH: badges
+        FOLDER: badges
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
