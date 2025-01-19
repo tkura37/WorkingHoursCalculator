@@ -49,11 +49,31 @@ Time subtractTime(Time timeA, Time timeB)
     timeDiff.hours   = timeA.hours - timeB.hours;
     timeDiff.minutes = timeA.minutes - timeB.minutes;
 
-    if (timeDiff.minutes < 0)
+    if (timeDiff.hours > 0)
     {
-        timeDiff.hours   -= 1;
-        timeDiff.minutes += 60;
+        if (timeDiff.minutes < 0)
+        {
+            timeDiff.hours   -= 1;
+            timeDiff.minutes += 60;
+        }
     }
+    else if (timeDiff.hours == 0)
+    {
+    }
+    else if (timeDiff.hours < 0)
+    {
+        if (timeDiff.minutes > 0)
+        {
+            timeDiff.hours   += 1;
+            timeDiff.minutes -= 60;
+        }
+        else
+        {
+            timeDiff.minutes = abs(timeDiff.minutes);
+        }
+    }
+    else
+    {}
 
     return timeDiff;
 }
@@ -176,11 +196,23 @@ Time calculateOverTime(Time start, Time end, Time breakTime)
 }
 
 /** @brief 時間の出力 */
-void printResult(const char *outputLabel, const Time time)
+float printResult(const char *outputLabel, Time time)
 {
     printf("%s", outputLabel);
-    printf("%d時間%02d分", time.hours, abs(time.minutes));
-    printf(" (%.2f)\n", (time.hours * 60 + time.minutes) / 60.0);
+    printf("%d時間%02d分", time.hours, time.minutes);
+    
+    float resultTime;
+    if (time.hours < 0)
+    {
+        time.hours = abs(time.hours);
+        resultTime = (time.hours * 60 + time.minutes) / 60.0;
+        resultTime *= -1;
+    }
+    else{
+        resultTime = (time.hours * 60 + time.minutes) / 60.0;
+    }
+    printf(" (%.2f)\n", resultTime);
+    return resultTime;
 }
 
 #ifndef TESTING

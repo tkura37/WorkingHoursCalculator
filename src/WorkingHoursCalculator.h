@@ -27,7 +27,7 @@ Time subtractTime(Time timeA, Time timeB);
 Time addTime(Time timeA, Time timeB);
 Time calculateBreakTime(Time end);
 Time calculateOverTime(Time start, Time end, Time breakTime);
-void printResult(const char *outputLabel, const Time time);
+float printResult(const char *outputLabel, Time time);
 
 #ifdef __cplusplus
 }
