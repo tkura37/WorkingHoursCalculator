@@ -64,13 +64,18 @@ TEST_F(WorkingHoursCalculatorTest, Test_subtractTime) {
         Time expectedtimeDiff;
     };
     std::vector<TestCase_subtractTime> testCases_subtractTime = {
-        /* timeAは常にtimeBと同じかそれより後の時刻が入力される。
-            引数の前後関係はソースコード上保証していないが、呼び出し元関数の単体テスト通過をもって前後関係が正しいことを保証する。 */
-        {{9, 30}, {8, 00}, {1, 30}},    /* timeA.hours > timeB.hours timeA.minutes > timeB.minutes */
-        {{9, 30}, {8, 30}, {1, 00}},    /* timeA.hours > timeB.hours timeA.minutes = timeB.minutes */
-        {{9, 00}, {8, 30}, {0, 30}},    /* timeA.hours > timeB.hours timeA.minutes < timeB.minutes */
-        {{9, 30}, {9, 00}, {0, 30}},    /* timeA.hours = timeB.hours timeA.minutes > timeB.minutes */
-        {{9, 30}, {9, 30}, {0, 00}},    /* timeA.hours = timeB.hours timeA.minutes = timeB.minutes */
+        /* timeA.hours > timeB.hours */
+        {{9, 30}, {8, 00}, {1, 30}},    /* timeA.minutes > timeB.minutes */
+        {{9, 30}, {8, 30}, {1, 00}},    /* timeA.minutes = timeB.minutes */
+        {{9, 00}, {8, 30}, {0, 30}},    /* timeA.minutes < timeB.minutes */
+        /* timeA.hours = timeB.hours */
+        {{9, 30}, {9, 00}, {0, 30}},    /* timeA.minutes > timeB.minutes */
+        {{9, 30}, {9, 30}, {0, 00}},    /* timeA.minutes = timeB.minutes */
+        {{9, 00}, {9, 30}, {0, -30}},   /* timeA.minutes < timeB.minutes */
+        /* timeA.hours < timeB.hours */
+        {{8, 30}, {9, 00}, {0, -30}},   /* timeA.minutes > timeB.minutes */
+        {{8, 30}, {9, 30}, {-1, 00}},   /* timeA.minutes = timeB.minutes */
+        {{8, 00}, {9, 30}, {-1, 30}},   /* timeA.minutes < timeB.minutes */
     };
 
     for (const auto& testCase : testCases_subtractTime) {
@@ -126,5 +131,32 @@ TEST_F(WorkingHoursCalculatorTest, Test_BreakAndOverTime) {
         EXPECT_EQ(calculatedBreakTime.minutes, testCase.expectedBreakTime.minutes)  << "  Failed for input: " << testCase.startTime.hours << ":" << testCase.startTime.minutes << " - " << testCase.endTime.hours << ":" << testCase.endTime.minutes;
         EXPECT_EQ(calculatedOverTime.hours, testCase.expectedOverTime.hours)        << "  Failed for input: " << testCase.startTime.hours << ":" << testCase.startTime.minutes << " - " << testCase.endTime.hours << ":" << testCase.endTime.minutes;
         EXPECT_EQ(calculatedOverTime.minutes, testCase.expectedOverTime.minutes)    << "  Failed for input: " << testCase.startTime.hours << ":" << testCase.startTime.minutes << " - " << testCase.endTime.hours << ":" << testCase.endTime.minutes;
+    }
+}
+/* printResult()のテスト */
+TEST_F(WorkingHoursCalculatorTest, Test_printResult) {
+    struct TestCase_printResult {
+        const char *outputLabel;
+        Time time;
+        float expectedResult;
+    };
+    std::vector<TestCase_printResult> testCases_printResult = {
+        /* 休憩時間のテストケース */
+        {"休憩時間: ", {0, 00}, 0.00},
+        {"休憩時間: ", {0, 45}, 0.75},
+        {"休憩時間: ", {1, 00}, 1.00},
+        /* 残業時間のテストケース */
+        {"残業時間: ", {0, 00}, 0.00},      /* hours = 0, minutes = 0 */
+        {"残業時間: ", {0, 30}, 0.50},      /* hours = 0, minutes > 0 */
+        {"残業時間: ", {0, -30}, -0.50},    /* hours = 0, minutes < 0 */
+        {"残業時間: ", {1, 00}, 1.00},      /* hours > 0, minutes = 0 */
+        {"残業時間: ", {1, 30}, 1.50},      /* hours > 0, minutes > 0 */
+        {"残業時間: ", {-1, 00}, -1.00},    /* hours < 0, minutes = 0 */
+        {"残業時間: ", {-1, 30}, -1.50},    /* hours < 0, minutes > 0 */
+    };
+
+    for (const auto& testCase : testCases_printResult) {
+        float result = printResult(testCase.outputLabel, testCase.time);
+        EXPECT_EQ(result, testCase.expectedResult) << "  Failed for input: " << testCase.outputLabel << testCase.time.hours << ", " << testCase.time.minutes;
     }
 }
