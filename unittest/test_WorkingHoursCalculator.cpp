@@ -56,6 +56,50 @@ TEST_F(WorkingHoursCalculatorTest, Test_isEarlierThan) {
     }
 }
 
+/* subtractTime()のテスト */
+TEST_F(WorkingHoursCalculatorTest, Test_subtractTime) {
+    struct TestCase_subtractTime {
+        Time timeA;
+        Time timeB;
+        Time expectedtimeDiff;
+    };
+    std::vector<TestCase_subtractTime> testCases_subtractTime = {
+        /* timeAは常にtimeBと同じかそれより後の時刻が入力される。
+            引数の前後関係はソースコード上保証していないが、呼び出し元関数の単体テスト通過をもって前後関係が正しいことを保証する。 */
+        {{9, 30}, {8, 00}, {1, 30}},    /* timeA.hours > timeB.hours timeA.minutes > timeB.minutes */
+        {{9, 30}, {8, 30}, {1, 00}},    /* timeA.hours > timeB.hours timeA.minutes = timeB.minutes */
+        {{9, 00}, {8, 30}, {0, 30}},    /* timeA.hours > timeB.hours timeA.minutes < timeB.minutes */
+        {{9, 30}, {9, 00}, {0, 30}},    /* timeA.hours = timeB.hours timeA.minutes > timeB.minutes */
+        {{9, 30}, {9, 30}, {0, 00}},    /* timeA.hours = timeB.hours timeA.minutes = timeB.minutes */
+    };
+
+    for (const auto& testCase : testCases_subtractTime) {
+        Time result = subtractTime(testCase.timeA, testCase.timeB);
+        EXPECT_EQ(result.hours, testCase.expectedtimeDiff.hours) << "  Failed for input: " << testCase.timeA.hours << ":" << testCase.timeA.minutes << " and " << testCase.timeB.hours << ":" << testCase.timeB.minutes;
+        EXPECT_EQ(result.minutes, testCase.expectedtimeDiff.minutes) << "  Failed for input: " << testCase.timeA.hours << ":" << testCase.timeA.minutes << " and " << testCase.timeB.hours << ":" << testCase.timeB.minutes;
+    }
+}
+
+/* addTime()のテスト */
+TEST_F(WorkingHoursCalculatorTest, Test_addTime) {
+    struct TestCase_addTime {
+        Time timeA;
+        Time timeB;
+        Time expectedTimeSum;
+    };
+    std::vector<TestCase_addTime> testCases_addTime = {
+        {{0, 30}, {0, 15}, {0, 45}},    /* timeA.minutes + timeB.minutes < 60 */
+        {{0, 30}, {0, 30}, {1, 00}},    /* timeA.minutes + timeB.minutes = 60 */
+        {{0, 30}, {0, 45}, {1, 15}},    /* timeA.minutes + timeB.minutes > 60 */
+    };
+
+    for (const auto& testCase : testCases_addTime) {
+        Time result = addTime(testCase.timeA, testCase.timeB);
+        EXPECT_EQ(result.hours, testCase.expectedTimeSum.hours) << "  Failed for input: " << testCase.timeA.hours << ":" << testCase.timeA.minutes << " and " << testCase.timeB.hours << ":" << testCase.timeB.minutes;
+        EXPECT_EQ(result.minutes, testCase.expectedTimeSum.minutes) << "  Failed for input: " << testCase.timeA.hours << ":" << testCase.timeA.minutes << " and " << testCase.timeB.hours << ":" << testCase.timeB.minutes;
+    }
+}
+
 /* calculateBreakTime()とcalculateOverTime() のテスト */
 TEST_F(WorkingHoursCalculatorTest, Test_BreakAndOverTime) {
     struct TestCase_BreakAndOverTime {
