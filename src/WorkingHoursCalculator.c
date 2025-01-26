@@ -104,11 +104,17 @@ Time calculateBreakTime(Time startTime, Time endTime)
     Time lunchbreakEndTime;
     Time standardEndTime;
     Time overtimeStartTime;
+    Time standardWorkTime;
 
     parseTime(LUNCHBREAK_START_TIME, &lunchbreakStartTime);
     parseTime(LUNCHBREAK_END_TIME, &lunchbreakEndTime);
     parseTime(STANDARD_END_TIME, &standardEndTime);
     parseTime(OVERTIME_START_TIME, &overtimeStartTime);
+    parseTime(STANDARD_WORK_HOURS, &standardWorkTime);
+
+    Time lunchBreakTime     = subtractTime(lunchbreakEndTime, lunchbreakStartTime);
+    Time overtimeBreakTime  = subtractTime(overtimeStartTime, standardEndTime);
+    Time fullBreakTime      = addTime(lunchBreakTime, overtimeBreakTime);
 
     /* 昼休み開始時刻までに出勤した場合 */
     /* 出勤時刻：入力された値 */
@@ -130,26 +136,20 @@ Time calculateBreakTime(Time startTime, Time endTime)
         /* 休憩時間：昼のみ */
         else if (isEarlierThan(endTime, standardEndTime))
         {
-            breakTime = subtractTime(lunchbreakEndTime, lunchbreakStartTime);
+            return breakTime = lunchBreakTime;
         }
         /* 定時～残業開始時刻までに退勤した場合 */
         /* 休憩時間：昼のみ */
         else if(isEarlierThan(endTime, overtimeStartTime))
         {
-            breakTime = subtractTime(lunchbreakEndTime, lunchbreakStartTime);        
+            return breakTime = lunchBreakTime;        
         }
         /* 残業開始時刻以降に退勤した場合 */
         /* 休憩時間：昼+残業 */
         else
         {
-            breakTime = subtractTime(lunchbreakEndTime, lunchbreakStartTime);
-
-            Time overtimeBreakTime;
-            overtimeBreakTime = subtractTime(overtimeStartTime, standardEndTime);   
-            
-            breakTime = addTime(breakTime, overtimeBreakTime);
+            return breakTime = fullBreakTime;
         }
-        return breakTime;
     }
     /* 昼休み開始時刻～昼休み終了時刻までに出勤した場合(午前休) */
     /* 出勤時刻：昼休み終了時刻とみなす */
@@ -179,8 +179,6 @@ Time calculateBreakTime(Time startTime, Time endTime)
         else
         {
             Time totalWorkTime = subtractTime(endTime, lunchbreakEndTime);
-            Time standardWorkTime;
-            parseTime(STANDARD_WORK_HOURS, &standardWorkTime);
 
             if (isEarlierThan(totalWorkTime, standardWorkTime))
             {
@@ -188,15 +186,9 @@ Time calculateBreakTime(Time startTime, Time endTime)
             }
             else
             {
-                breakTime = subtractTime(lunchbreakEndTime, lunchbreakStartTime);
-
-                Time overtimeBreakTime;
-                overtimeBreakTime = subtractTime(overtimeStartTime, standardEndTime);   
-                
-                breakTime = addTime(breakTime, overtimeBreakTime);
+                return breakTime = fullBreakTime;
             }
         }
-        return breakTime;
     }
     /* 昼休み終了時刻～定時までに出勤した場合 */
     /* 出勤時刻：入力された値 */
@@ -220,8 +212,6 @@ Time calculateBreakTime(Time startTime, Time endTime)
         else
         {
             Time totalWorkTime = subtractTime(endTime, startTime);
-            Time standardWorkTime;
-            parseTime(STANDARD_WORK_HOURS, &standardWorkTime);
 
             if (isEarlierThan(totalWorkTime, standardWorkTime))
             {
@@ -229,15 +219,9 @@ Time calculateBreakTime(Time startTime, Time endTime)
             }
             else
             {
-                breakTime = subtractTime(lunchbreakEndTime, lunchbreakStartTime);
-
-                Time overtimeBreakTime;
-                overtimeBreakTime = subtractTime(overtimeStartTime, standardEndTime);   
-                
-                breakTime = addTime(breakTime, overtimeBreakTime);
+                return breakTime = fullBreakTime;
             }
         }
-        return breakTime;
     }
     /* 定時以降に出勤した場合 */
     else
