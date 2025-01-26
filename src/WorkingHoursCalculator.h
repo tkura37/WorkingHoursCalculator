@@ -25,7 +25,7 @@ int parseTime(const char *timeStr, Time *time);
 bool isEarlierThan(Time time1, Time time2);
 Time subtractTime(Time timeA, Time timeB);
 Time addTime(Time timeA, Time timeB);
-Time calculateBreakTime(Time end);
+Time calculateBreakTime(Time startTime, Time endTime);
 Time calculateOverTime(Time start, Time end, Time breakTime);
 float printResult(const char *outputLabel, Time time);
 
