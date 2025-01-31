@@ -41,6 +41,27 @@ bool isEarlierThan(Time timeA, Time timeB)
     return false;
 }
 
+/** @brief マクロ定義時刻の順番バリデーション */
+bool validateSettingTimeOrder(const Time* lunchbreakStartTime, const Time* lunchbreakEndTime, const Time* standardEndTime, const Time* overtimeStartTime)
+{
+    if (isEarlierThan(*lunchbreakEndTime, *lunchbreakStartTime))
+    {
+        fprintf(stderr, "Error: LUNCHBREAK_END_TIME must be later than LUNCHBREAK_START_TIME.\n");
+        return false;
+    }
+    if (isEarlierThan(*standardEndTime, *lunchbreakEndTime))
+    {
+        fprintf(stderr, "Error: STANDARD_END_TIME must be later than LUNCHBREAK_END_TIME.\n");
+        return false;
+    }
+    if (isEarlierThan(*overtimeStartTime, *standardEndTime))
+    {
+        fprintf(stderr, "Error: OVERTIME_START_TIME must be later than STANDARD_END_TIME.\n");
+        return false;
+    }
+    return true;
+}
+
 /** @brief Timeオブジェクト同士の差分計算(timeA - timeB) */
 Time subtractTime(Time timeA, Time timeB)
 {
@@ -398,6 +419,21 @@ int main(int argc, char *argv[])
         fprintf(stderr, "usage: ./WorkingHoursCalculator 8:30 17:00\n");
         return 1;
     };
+
+    Time lunchbreakStartTime;
+    Time lunchbreakEndTime;
+    Time standardEndTime;
+    Time overtimeStartTime;
+
+    parseTime(LUNCHBREAK_START_TIME, &lunchbreakStartTime);
+    parseTime(LUNCHBREAK_END_TIME, &lunchbreakEndTime);
+    parseTime(STANDARD_END_TIME, &standardEndTime);
+    parseTime(OVERTIME_START_TIME, &overtimeStartTime);
+
+    if (!validateSettingTimeOrder(&lunchbreakStartTime, &lunchbreakEndTime, &standardEndTime, &overtimeStartTime))
+    {
+        return 1;
+    }
 
     /* 休憩時間・残業時間の計算 */
     Time breakTime = calculateBreakTime(startTime, endTime);

@@ -56,6 +56,38 @@ TEST_F(WorkingHoursCalculatorTest, Test_isEarlierThan) {
     }
 }
 
+/* validateSettingTimeOrder()のテスト */
+TEST_F(WorkingHoursCalculatorTest, Test_validateSettingTimeOrder) {
+    struct TestCase_validateSettingTimeOrder {
+        const char* lunchStart;
+        const char* lunchEnd;
+        const char* standardEnd;
+        const char* overtimeStart;
+        bool expectedResult;
+    };
+    std::vector<TestCase_validateSettingTimeOrder> testCases_validateSettingTimeOrder = {
+        {"12:00", "12:45", "17:45", "18:00", true},     /* 正常系 */
+        {"12:00", "11:00", "17:45", "18:00", false},    /* 異常系： 昼休み終了時刻が昼休み開始時刻より早い */
+        {"12:00", "12:45", "12:30", "18:00", false},    /* 異常系: 定時終了時刻が昼休み終了時刻より早い */
+        {"12:00", "12:45", "17:45", "17:00", false},    /* 異常系: 残業開始時刻が定時終了時刻より早い */
+    };
+
+    for (const auto& testCase : testCases_validateSettingTimeOrder) {
+        Time lunchbreakStartTime;
+        Time lunchbreakEndTime;
+        Time standardEndTime;
+        Time overtimeStartTime;
+
+        parseTime(testCase.lunchStart, &lunchbreakStartTime);
+        parseTime(testCase.lunchEnd, &lunchbreakEndTime);
+        parseTime(testCase.standardEnd, &standardEndTime);
+        parseTime(testCase.overtimeStart, &overtimeStartTime);
+
+        EXPECT_EQ(validateSettingTimeOrder(&lunchbreakStartTime, &lunchbreakEndTime, &standardEndTime, &overtimeStartTime), testCase.expectedResult)
+            << "  Failed for input: " << testCase.lunchStart << ", " << testCase.lunchEnd << ", " << testCase.standardEnd << ", " << testCase.overtimeStart;
+    }
+}
+
 /* subtractTime()のテスト */
 TEST_F(WorkingHoursCalculatorTest, Test_subtractTime) {
     struct TestCase_subtractTime {
