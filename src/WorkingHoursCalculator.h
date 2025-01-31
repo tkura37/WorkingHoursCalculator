@@ -23,6 +23,7 @@ typedef struct {
 /* プロトタイプ宣言 */
 int parseTime(const char *timeStr, Time *time);
 bool isEarlierThan(Time time1, Time time2);
+bool validateSettingTimeOrder(const Time* lunchbreakStartTime, const Time* lunchbreakEndTime, const Time* standardEndTime, const Time* overtimeStartTime);
 Time subtractTime(Time timeA, Time timeB);
 Time addTime(Time timeA, Time timeB);
 Time calculateBreakTime(Time startTime, Time endTime);
