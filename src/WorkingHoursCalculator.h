@@ -20,14 +20,27 @@ typedef struct {
     int minutes;
 } Time;
 
+typedef struct {
+    Time lunchbreakStartTime;
+    Time lunchbreakEndTime;
+    Time standardEndTime;
+    Time overtimeStartTime;
+    Time standardWorkTime;
+} USER_SETTING;
+
+typedef struct {
+    Time startTime;
+    Time endTime;
+} USER_INPUT;
+
 /* プロトタイプ宣言 */
 int parseTime(const char *timeStr, Time *time);
-bool isEarlierThan(Time time1, Time time2);
-bool validateSettingTimeOrder(const Time* lunchbreakStartTime, const Time* lunchbreakEndTime, const Time* standardEndTime, const Time* overtimeStartTime);
-Time subtractTime(Time timeA, Time timeB);
-Time addTime(Time timeA, Time timeB);
-Time calculateBreakTime(Time startTime, Time endTime);
-Time calculateOverTime(Time start, Time end, Time breakTime);
+bool isEarlierThan(const Time *timeA, const Time *timeB);
+bool validateSettingTimeOrder(const USER_SETTING *userSetting);
+Time subtractTime(const Time *timeA, const Time *timeB);
+Time addTime(const Time *timeA, const Time *timeB);
+Time calculateBreakTime(const USER_INPUT *userInput, const USER_SETTING *userSetting);
+Time calculateOverTime(const USER_INPUT *userInput, const USER_SETTING *userSetting, const Time *breakTime);
 float printResult(const char *outputLabel, Time time);
 
 #ifdef __cplusplus
