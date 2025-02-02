@@ -176,17 +176,21 @@ TEST_F(WorkingHoursCalculatorTest, Test_BreakAndOverTime) {
 
     for (const auto& testCase : testCases_BreakAndOverTime) {
         USER_INPUT userInput = {testCase.startTime, testCase.endTime};
+
         USER_SETTING userSetting = {
             {12, 15}, {13, 00}, {17, 00}, {17, 15}, {7, 45}
         };
 
-        Time calculatedBreakTime = calculateBreakTime(&userInput, &userSetting);
-        Time calculatedOverTime = calculateOverTime(&userInput, &userSetting, &calculatedBreakTime);
+        Time breakTime = {0, 0};
+        Time overTime = {0, 0};
 
-        EXPECT_EQ(calculatedBreakTime.hours, testCase.expectedBreakTime.hours)      << "  Failed for input: " << testCase.startTime.hours << ":" << testCase.startTime.minutes << " - " << testCase.endTime.hours << ":" << testCase.endTime.minutes;
-        EXPECT_EQ(calculatedBreakTime.minutes, testCase.expectedBreakTime.minutes)  << "  Failed for input: " << testCase.startTime.hours << ":" << testCase.startTime.minutes << " - " << testCase.endTime.hours << ":" << testCase.endTime.minutes;
-        EXPECT_EQ(calculatedOverTime.hours, testCase.expectedOverTime.hours)        << "  Failed for input: " << testCase.startTime.hours << ":" << testCase.startTime.minutes << " - " << testCase.endTime.hours << ":" << testCase.endTime.minutes;
-        EXPECT_EQ(calculatedOverTime.minutes, testCase.expectedOverTime.minutes)    << "  Failed for input: " << testCase.startTime.hours << ":" << testCase.startTime.minutes << " - " << testCase.endTime.hours << ":" << testCase.endTime.minutes;
+        calculateBreakAndOverTime(&userInput, &userSetting, &breakTime, &overTime);
+
+        EXPECT_EQ(breakTime.hours, testCase.expectedBreakTime.hours) << "  Failed for input: " << testCase.startTime.hours << ":" << testCase.startTime.minutes << " and " << testCase.endTime.hours << ":" << testCase.endTime.minutes;
+        EXPECT_EQ(breakTime.minutes, testCase.expectedBreakTime.minutes) << "  Failed for input: " << testCase.startTime.hours << ":" << testCase.startTime.minutes << " and " << testCase.endTime.hours << ":" << testCase.endTime.minutes;
+
+        EXPECT_EQ(overTime.hours, testCase.expectedOverTime.hours) << "  Failed for input: " << testCase.startTime.hours << ":" << testCase.startTime.minutes << " and " << testCase.endTime.hours << ":" << testCase.endTime.minutes;
+        EXPECT_EQ(overTime.minutes, testCase.expectedOverTime.minutes) << "  Failed for input: " << testCase.startTime.hours << ":" << testCase.startTime.minutes << " and " << testCase.endTime.hours << ":" << testCase.endTime.minutes;
     }
 }
 /* printResult()のテスト */

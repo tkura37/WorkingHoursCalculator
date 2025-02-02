@@ -39,8 +39,7 @@ bool isEarlierThan(const Time *timeA, const Time *timeB);
 bool validateSettingTimeOrder(const USER_SETTING *userSetting);
 Time subtractTime(const Time *timeA, const Time *timeB);
 Time addTime(const Time *timeA, const Time *timeB);
-Time calculateBreakTime(const USER_INPUT *userInput, const USER_SETTING *userSetting);
-Time calculateOverTime(const USER_INPUT *userInput, const USER_SETTING *userSetting, const Time *breakTime);
+void calculateBreakAndOverTime(const USER_INPUT *userInput, const USER_SETTING *userSetting, Time *breakTime, Time *overTime);
 float printResult(const char *outputLabel, Time time);
 
 #ifdef __cplusplus

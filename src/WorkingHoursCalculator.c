@@ -114,14 +114,13 @@ Time addTime(const Time *timeA, const Time *timeB)
     return timeSum;
 }
 
-/** @brief 休憩時間の計算 */
-Time calculateBreakTime(const USER_INPUT *userInput, const USER_SETTING *userSetting)
+/** @brief 休憩時間と残業時間の計算 */
+void calculateBreakAndOverTime(const USER_INPUT *userInput, const USER_SETTING *userSetting, Time *breakTime, Time *overTime)
 {
-    Time breakTime = {0, 0};
-
-    Time lunchBreakTime     = subtractTime(&userSetting->lunchbreakEndTime, &userSetting->lunchbreakStartTime);
-    Time overtimeBreakTime  = subtractTime(&userSetting->overtimeStartTime, &userSetting->standardEndTime);
-    Time fullBreakTime      = addTime(&lunchBreakTime, &overtimeBreakTime);
+    Time lunchBreakTime = subtractTime(&userSetting->lunchbreakEndTime, &userSetting->lunchbreakStartTime);
+    Time overtimeBreakTime = subtractTime(&userSetting->overtimeStartTime, &userSetting->standardEndTime);
+    Time fullBreakTime = addTime(&lunchBreakTime, &overtimeBreakTime);
+    Time totalWorkTime;
 
     /* 昼休み開始時刻までに出勤した場合 */
     /* 出勤時刻：入力された値 */
@@ -129,155 +128,42 @@ Time calculateBreakTime(const USER_INPUT *userInput, const USER_SETTING *userSet
     {
         /* 昼休み開始時刻までに退勤した場合 */
         /* 休憩時間：0分 */
-        if (isEarlierThan(&userInput->endTime, &userSetting->lunchbreakStartTime))
-        {
-            return breakTime;
-        }
-        /* 昼休み開始時刻～昼休み終了時刻までに退勤した場合 */
-        /* 休憩時間：0分 */
-        else if (isEarlierThan(&userInput->endTime, &userSetting->lunchbreakEndTime))
-        {
-            return breakTime;
-        }
-        /* 昼休み終了時刻～定時までに退勤した場合 */
-        /* 休憩時間：昼のみ */
-        else if (isEarlierThan(&userInput->endTime, &userSetting->standardEndTime))
-        {
-            return breakTime = lunchBreakTime;
-        }
-        /* 定時～残業開始時刻までに退勤した場合 */
-        /* 休憩時間：昼のみ */
-        else if(isEarlierThan(&userInput->endTime, &userSetting->overtimeStartTime))
-        {
-            return breakTime = lunchBreakTime;        
-        }
-        /* 残業開始時刻以降に退勤した場合 */
-        /* 休憩時間：昼+残業 */
-        else
-        {
-            return breakTime = fullBreakTime;
-        }
-    }
-    /* 昼休み開始時刻～昼休み終了時刻までに出勤した場合(午前休) */
-    /* 出勤時刻：昼休み終了時刻とみなす */
-    else if (isEarlierThan(&userInput->startTime, &userSetting->lunchbreakEndTime))
-    {
-        /* 昼休み開始時刻～昼休み終了時刻までに退勤した場合 */
-        /* 休憩時間：0分 */
-        if (isEarlierThan(&userInput->endTime, &userSetting->lunchbreakEndTime))
-        {
-            return breakTime;
-        }
-        /* 昼休み終了時刻～定時までに退勤した場合 */
-        /* 休憩時間：0分 */
-        else if (isEarlierThan(&userInput->endTime, &userSetting->standardEndTime))
-        {
-            return breakTime;
-        }
-        /* 定時～残業開始時刻までに退勤した場合 */
-        /* 休憩時間：0分 */
-        else if(isEarlierThan(&userInput->endTime, &userSetting->overtimeStartTime))
-        {
-            return breakTime;
-        }
-        /* 残業開始時刻以降に退勤した場合 */
-        /* 休憩時間：標準勤務時間以下の場合、0分 */
-        /* 休憩時間：標準勤務時間以上の場合、昼+残業 */
-        else
-        {
-            Time totalWorkTime = subtractTime(&userInput->endTime, &userSetting->lunchbreakEndTime);
-
-            if (isEarlierThan(&totalWorkTime, &userSetting->standardWorkTime))
-            {
-                return breakTime;
-            }
-            else
-            {
-                return breakTime = fullBreakTime;
-            }
-        }
-    }
-    /* 昼休み終了時刻～定時までに出勤した場合 */
-    /* 出勤時刻：入力された値 */
-    else if (isEarlierThan(&userInput->startTime, &userSetting->standardEndTime))
-    {
-        /* 昼休み終了時刻～定時までに退勤した場合 */
-        /* 休憩時間：0分 */
-        if (isEarlierThan(&userInput->endTime, &userSetting->standardEndTime))
-        {
-            return breakTime;
-        }
-        /* 定時～残業開始時刻までに退勤した場合 */
-        /* 休憩時間：0分 */
-        else if(isEarlierThan(&userInput->endTime, &userSetting->overtimeStartTime))
-        {
-            return breakTime;
-        }
-        /* 残業開始時刻以降に退勤した場合 */
-        /* 休憩時間：標準勤務時間以下の場合、0分 */
-        /* 休憩時間：標準勤務時間以上の場合、昼+残業 */
-        else
-        {
-            Time totalWorkTime = subtractTime(&userInput->endTime, &userInput->startTime);
-
-            if (isEarlierThan(&totalWorkTime, &userSetting->standardWorkTime))
-            {
-                return breakTime;
-            }
-            else
-            {
-                return breakTime = fullBreakTime;
-            }
-        }
-    }
-    /* 定時以降に出勤した場合 */
-    else
-    {
-        /* 定時後の出勤は最初のバリデーションでNGとするため、このパターンには入らない */
-    }
-}
-
-/** @brief 残業時間の計算 */
-Time calculateOverTime(const USER_INPUT *userInput, const USER_SETTING *userSetting, const Time *breakTime)
-{
-    Time overTime = {0, 0};
-
-    Time totalWorkTime;     /* 勤務時間 */
-    
-    /* 昼休み開始時刻までに出勤した場合 */
-    /* 出勤時刻：入力された値 */
-    if (isEarlierThan(&userInput->startTime, &userSetting->lunchbreakStartTime))
-    {
-        /* 昼休み開始時刻までに退勤した場合 */
         /* 勤務時間：退勤時刻-出勤時刻 */
         if (isEarlierThan(&userInput->endTime, &userSetting->lunchbreakStartTime))
         {
             totalWorkTime = subtractTime(&userInput->endTime, &userInput->startTime);
         }
         /* 昼休み開始時刻～昼休み終了時刻までに退勤した場合 */
+        /* 休憩時間：0分 */
         /* 勤務時間：昼休み開始時刻-出勤時刻 */
         else if (isEarlierThan(&userInput->endTime, &userSetting->lunchbreakEndTime))
         {
             totalWorkTime = subtractTime(&userSetting->lunchbreakStartTime, &userInput->startTime);
         }
         /* 昼休み終了時刻～定時までに退勤した場合 */
+        /* 休憩時間：昼のみ */
         /* 勤務時間：退勤時刻-出勤時刻-休憩時間(昼) */
         else if (isEarlierThan(&userInput->endTime, &userSetting->standardEndTime))
         {
+            *breakTime = lunchBreakTime;
             totalWorkTime = subtractTime(&userInput->endTime, &userInput->startTime);
             totalWorkTime = subtractTime(&totalWorkTime, breakTime);
         }
         /* 定時～残業開始時刻までに退勤した場合 */
+        /* 休憩時間：昼のみ */
         /* 勤務時間：定時退勤時刻-出勤時刻-休憩時間(昼) */
-        else if(isEarlierThan(&userInput->endTime, &userSetting->overtimeStartTime))
+        else if (isEarlierThan(&userInput->endTime, &userSetting->overtimeStartTime))
         {
+            *breakTime = lunchBreakTime;
             totalWorkTime = subtractTime(&userSetting->standardEndTime, &userInput->startTime);
             totalWorkTime = subtractTime(&totalWorkTime, breakTime);
         }
         /* 残業開始時刻以降に退勤した場合 */
+        /* 休憩時間：昼+残業 */
         /* 勤務時間：退勤時刻-出勤時刻-休憩時間(昼+残業) */
         else
         {
+            *breakTime = fullBreakTime;
             totalWorkTime = subtractTime(&userInput->endTime, &userInput->startTime);
             totalWorkTime = subtractTime(&totalWorkTime, breakTime);
         }
@@ -287,29 +173,41 @@ Time calculateOverTime(const USER_INPUT *userInput, const USER_SETTING *userSett
     else if (isEarlierThan(&userInput->startTime, &userSetting->lunchbreakEndTime))
     {
         /* 昼休み開始時刻～昼休み終了時刻までに退勤した場合 */
-        /* 勤務時間：0 */
+        /* 休憩時間：0分 */
+        /* 勤務時間：0分 */
         if (isEarlierThan(&userInput->endTime, &userSetting->lunchbreakEndTime))
         {
-            return overTime;
+            return;
         }
         /* 昼休み終了時刻～定時までに退勤した場合 */
+        /* 休憩時間：0分 */
         /* 勤務時間：退勤時刻-昼休み終了時刻 */
         else if (isEarlierThan(&userInput->endTime, &userSetting->standardEndTime))
         {
             totalWorkTime = subtractTime(&userInput->endTime, &userSetting->lunchbreakEndTime);
         }
         /* 定時～残業開始時刻までに退勤した場合 */
+        /* 休憩時間：0分 */
         /* 勤務時間：定時退勤時刻-昼休み終了時刻 */
-        else if(isEarlierThan(&userInput->endTime, &userSetting->overtimeStartTime))
+        else if (isEarlierThan(&userInput->endTime, &userSetting->overtimeStartTime))
         {
             totalWorkTime = subtractTime(&userSetting->standardEndTime, &userSetting->lunchbreakEndTime);
         }
         /* 残業開始時刻以降に退勤した場合 */
+        /* 休憩時間：標準勤務時間以下の場合、0分 */
+        /* 休憩時間：標準勤務時間以上の場合、昼+残業 */
         /* 勤務時間：標準勤務時間以下の場合、退勤時刻-出勤時刻-休憩時間(0分) */
         /* 勤務時間：標準勤務時間以上の場合、退勤時刻-出勤時刻-休憩時間(昼+残業) */
         else
         {
             totalWorkTime = subtractTime(&userInput->endTime, &userSetting->lunchbreakEndTime);
+            if (isEarlierThan(&totalWorkTime, &userSetting->standardWorkTime))
+            {
+            }
+            else
+            {
+                *breakTime = fullBreakTime;
+            }
             totalWorkTime = subtractTime(&totalWorkTime, breakTime);
         }
     }
@@ -318,23 +216,34 @@ Time calculateOverTime(const USER_INPUT *userInput, const USER_SETTING *userSett
     else if (isEarlierThan(&userInput->startTime, &userSetting->standardEndTime))
     {
         /* 昼休み終了時刻～定時までに退勤した場合 */
+        /* 休憩時間：0分 */
         /* 勤務時間：退勤時刻-出勤時刻 */
         if (isEarlierThan(&userInput->endTime, &userSetting->standardEndTime))
         {
             totalWorkTime = subtractTime(&userInput->endTime, &userInput->startTime);
         }
         /* 定時～残業開始時刻までに退勤した場合 */
+        /* 休憩時間：0分 */
         /* 勤務時間：定時退勤時刻-出勤時刻 */
-        else if(isEarlierThan(&userInput->endTime, &userSetting->overtimeStartTime))
+        else if (isEarlierThan(&userInput->endTime, &userSetting->overtimeStartTime))
         {
             totalWorkTime = subtractTime(&userSetting->standardEndTime, &userInput->startTime);
         }
         /* 残業開始時刻以降に退勤した場合 */
+        /* 休憩時間：標準勤務時間以下の場合、0分 */
+        /* 休憩時間：標準勤務時間以上の場合、昼+残業 */
         /* 勤務時間：標準勤務時間以下の場合、退勤時刻-出勤時刻-休憩時間(0分) */
         /* 勤務時間：標準勤務時間以上の場合、退勤時刻-出勤時刻-休憩時間(昼+残業) */
         else
         {
             totalWorkTime = subtractTime(&userInput->endTime, &userInput->startTime);
+            if (isEarlierThan(&totalWorkTime, &userSetting->standardWorkTime))
+            {
+            }
+            else
+            {
+                *breakTime = fullBreakTime;
+            }
             totalWorkTime = subtractTime(&totalWorkTime, breakTime);
         }
     }
@@ -344,9 +253,8 @@ Time calculateOverTime(const USER_INPUT *userInput, const USER_SETTING *userSett
         /* 定時後の出勤は最初のバリデーションでNGとするため、このパターンには入らない */
     }
 
-    overTime = subtractTime(&totalWorkTime, &userSetting->standardWorkTime);
-
-    return overTime;
+    /* 残業時間の計算 */
+    *overTime = subtractTime(&totalWorkTime, &userSetting->standardWorkTime);
 }
 
 /** @brief 時間の出力 */
@@ -407,8 +315,9 @@ int main(int argc, char *argv[])
     }
 
     /* 休憩時間・残業時間の計算 */
-    Time breakTime = calculateBreakTime(&userInput, &userSetting);
-    Time overTime = calculateOverTime(&userInput, &userSetting, &breakTime);
+    Time breakTime = {0, 0};
+    Time overTime = {0, 0};
+    calculateBreakAndOverTime(&userInput, &userSetting, &breakTime, &overTime);
     
     /* 休憩時間と残業時間の出力 */
     printResult("休憩時間: ", breakTime);
