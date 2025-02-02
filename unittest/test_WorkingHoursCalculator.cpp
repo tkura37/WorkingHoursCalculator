@@ -26,12 +26,13 @@ TEST_F(WorkingHoursCalculatorTest, Test_parseTime) {
     };
 
     for (const auto& testCase : testCases_parseTime) {
-        Time time = {0, 0};
-        int parseResult = parseTime(testCase.timeStr, &time);
+        Time ouputTime = {0, 0};
+
+        int parseResult = parseTime(testCase.timeStr, &ouputTime);
 
         EXPECT_EQ(parseResult, testCase.expectedParseResult)    << "  Failed for input: " << testCase.timeStr;
-        EXPECT_EQ(time.hours, testCase.expectedTime.hours)      << "  Failed for input: " << testCase.timeStr;
-        EXPECT_EQ(time.minutes, testCase.expectedTime.minutes)  << "  Failed for input: " << testCase.timeStr;
+        EXPECT_EQ(ouputTime.hours, testCase.expectedTime.hours)      << "  Failed for input: " << testCase.timeStr;
+        EXPECT_EQ(ouputTime.minutes, testCase.expectedTime.minutes)  << "  Failed for input: " << testCase.timeStr;
     }
 }
 
@@ -51,7 +52,7 @@ TEST_F(WorkingHoursCalculatorTest, Test_isEarlierThan) {
     };
 
     for (const auto& testCase : testCases_isEarlierThan) {
-        bool result = isEarlierThan(testCase.timeA, testCase.timeB);
+        bool result = isEarlierThan(&testCase.timeA, &testCase.timeB);
         EXPECT_EQ(result, testCase.expectedResult) << "  Failed for input: " << testCase.timeA.hours << ":" << testCase.timeA.minutes << " and " << testCase.timeB.hours << ":" << testCase.timeB.minutes;
     }
 }
@@ -59,10 +60,10 @@ TEST_F(WorkingHoursCalculatorTest, Test_isEarlierThan) {
 /* validateSettingTimeOrder()のテスト */
 TEST_F(WorkingHoursCalculatorTest, Test_validateSettingTimeOrder) {
     struct TestCase_validateSettingTimeOrder {
-        const char* lunchStart;
-        const char* lunchEnd;
-        const char* standardEnd;
-        const char* overtimeStart;
+        const char *lunchStart;
+        const char *lunchEnd;
+        const char *standardEnd;
+        const char *overtimeStart;
         bool expectedResult;
     };
     std::vector<TestCase_validateSettingTimeOrder> testCases_validateSettingTimeOrder = {
@@ -73,17 +74,13 @@ TEST_F(WorkingHoursCalculatorTest, Test_validateSettingTimeOrder) {
     };
 
     for (const auto& testCase : testCases_validateSettingTimeOrder) {
-        Time lunchbreakStartTime;
-        Time lunchbreakEndTime;
-        Time standardEndTime;
-        Time overtimeStartTime;
+        USER_SETTING userSetting;
+        parseTime(testCase.lunchStart, &userSetting.lunchbreakStartTime);
+        parseTime(testCase.lunchEnd, &userSetting.lunchbreakEndTime);
+        parseTime(testCase.standardEnd, &userSetting.standardEndTime);
+        parseTime(testCase.overtimeStart, &userSetting.overtimeStartTime);
 
-        parseTime(testCase.lunchStart, &lunchbreakStartTime);
-        parseTime(testCase.lunchEnd, &lunchbreakEndTime);
-        parseTime(testCase.standardEnd, &standardEndTime);
-        parseTime(testCase.overtimeStart, &overtimeStartTime);
-
-        EXPECT_EQ(validateSettingTimeOrder(&lunchbreakStartTime, &lunchbreakEndTime, &standardEndTime, &overtimeStartTime), testCase.expectedResult)
+        EXPECT_EQ(validateSettingTimeOrder(&userSetting), testCase.expectedResult)
             << "  Failed for input: " << testCase.lunchStart << ", " << testCase.lunchEnd << ", " << testCase.standardEnd << ", " << testCase.overtimeStart;
     }
 }
@@ -111,7 +108,7 @@ TEST_F(WorkingHoursCalculatorTest, Test_subtractTime) {
     };
 
     for (const auto& testCase : testCases_subtractTime) {
-        Time result = subtractTime(testCase.timeA, testCase.timeB);
+        Time result = subtractTime(&testCase.timeA, &testCase.timeB);
         EXPECT_EQ(result.hours, testCase.expectedtimeDiff.hours) << "  Failed for input: " << testCase.timeA.hours << ":" << testCase.timeA.minutes << " and " << testCase.timeB.hours << ":" << testCase.timeB.minutes;
         EXPECT_EQ(result.minutes, testCase.expectedtimeDiff.minutes) << "  Failed for input: " << testCase.timeA.hours << ":" << testCase.timeA.minutes << " and " << testCase.timeB.hours << ":" << testCase.timeB.minutes;
     }
@@ -131,7 +128,7 @@ TEST_F(WorkingHoursCalculatorTest, Test_addTime) {
     };
 
     for (const auto& testCase : testCases_addTime) {
-        Time result = addTime(testCase.timeA, testCase.timeB);
+        Time result = addTime(&testCase.timeA, &testCase.timeB);
         EXPECT_EQ(result.hours, testCase.expectedTimeSum.hours) << "  Failed for input: " << testCase.timeA.hours << ":" << testCase.timeA.minutes << " and " << testCase.timeB.hours << ":" << testCase.timeB.minutes;
         EXPECT_EQ(result.minutes, testCase.expectedTimeSum.minutes) << "  Failed for input: " << testCase.timeA.hours << ":" << testCase.timeA.minutes << " and " << testCase.timeB.hours << ":" << testCase.timeB.minutes;
     }
@@ -178,8 +175,13 @@ TEST_F(WorkingHoursCalculatorTest, Test_BreakAndOverTime) {
     };
 
     for (const auto& testCase : testCases_BreakAndOverTime) {
-        Time calculatedBreakTime = calculateBreakTime(testCase.startTime, testCase.endTime);
-        Time calculatedOverTime = calculateOverTime(testCase.startTime, testCase.endTime, calculatedBreakTime);
+        USER_INPUT userInput = {testCase.startTime, testCase.endTime};
+        USER_SETTING userSetting = {
+            {12, 15}, {13, 00}, {17, 00}, {17, 15}, {7, 45}
+        };
+
+        Time calculatedBreakTime = calculateBreakTime(&userInput, &userSetting);
+        Time calculatedOverTime = calculateOverTime(&userInput, &userSetting, &calculatedBreakTime);
 
         EXPECT_EQ(calculatedBreakTime.hours, testCase.expectedBreakTime.hours)      << "  Failed for input: " << testCase.startTime.hours << ":" << testCase.startTime.minutes << " - " << testCase.endTime.hours << ":" << testCase.endTime.minutes;
         EXPECT_EQ(calculatedBreakTime.minutes, testCase.expectedBreakTime.minutes)  << "  Failed for input: " << testCase.startTime.hours << ":" << testCase.startTime.minutes << " - " << testCase.endTime.hours << ":" << testCase.endTime.minutes;
