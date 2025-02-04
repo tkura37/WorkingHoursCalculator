@@ -1,3 +1,4 @@
+[![CodeQL CI](https://github.com/tkura37/WorkingHoursCalculator/actions/workflows/CodeQL-CI.yml/badge.svg)](https://github.com/tkura37/WorkingHoursCalculator/actions/workflows/CodeQL-CI.yml)
 [![GoogleTest CI](https://github.com/tkura37/WorkingHoursCalculator/actions/workflows/GoogleTest-CI.yml/badge.svg)](https://github.com/tkura37/WorkingHoursCalculator/actions/workflows/GoogleTest-CI.yml)
 ![Coverage](https://github.com/tkura37/WorkingHoursCalculator/blob/badges/badge_linecoverage.svg)
 # 休憩時間・残業時間計算プログラム
