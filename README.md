@@ -8,13 +8,18 @@
 - フレックス勤務想定(遅刻時間の出力はしない)
 
 ## 利用技術
+※メインプログラムのbuildおよび実行はWindows上で、単体テストはWSL上で実施
 - C言語(メインソースコード)
 - GoogleTest(C++)(単体テストコード)
 - Make
 - CMake
-- GitHub Actions(CI)
-  - main branchへのpushまたはPullRequest作成時、単体テストの実行・カバレッジ測定を自動実施
-- メインプログラムのbuildおよび実行はWindows上で、単体テストはWSL上で実施
+- GitHub Actions(CI)  
+  main branchへのpush時またはPullRequest作成時に以下を自動実行
+  - 静的解析(CodeQL)
+    - READMEに結果をバッジ表示
+  - 単体テスト実行・カバレッジ測定
+    - READMEに結果をバッジ表示
+    - PullRequestにTest Summaryコメント追加
 
 ## 使い方
 例）標準勤務時間が`9:00~18:00`、休憩時間が`12:00~13:00`・`18:00~18:15`の場合
