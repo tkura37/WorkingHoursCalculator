@@ -6,7 +6,7 @@ extern "C" {
 #endif
 
 /* マクロ定義 */
-#define STANDARD_WORK_HOURS     "7:45"  // 標準の勤務時間
+#define STANDARD_WORK_HOURS     "7:45"  // 所定労働時間
 
 #define LUNCHBREAK_START_TIME   "12:15" // 昼休みの開始時刻
 #define LUNCHBREAK_END_TIME     "13:00" // 昼休みの終了時刻
