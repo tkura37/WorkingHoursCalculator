@@ -67,6 +67,7 @@ Time subtractTime(const Time *timeA, const Time *timeB)
     timeDiff.hours   = timeA->hours - timeB->hours;
     timeDiff.minutes = timeA->minutes - timeB->minutes;
 
+    /* hoursが0以外の場合、minutesは常に正の値を取る */
     if (timeDiff.hours > 0)
     {
         if (timeDiff.minutes < 0)
@@ -75,6 +76,7 @@ Time subtractTime(const Time *timeA, const Time *timeB)
             timeDiff.minutes += 60;
         }
     }
+    /* hoursが0の場合、minutesは負の値を取りうる */
     else if (timeDiff.hours == 0)
     {
     }
@@ -85,7 +87,8 @@ Time subtractTime(const Time *timeA, const Time *timeB)
             timeDiff.hours   += 1;
             timeDiff.minutes -= 60;
         }
-        else
+        /* hoursが0以外の場合、minutesは常に正の値を取る */
+        if (timeDiff.hours != 0)
         {
             timeDiff.minutes = abs(timeDiff.minutes);
         }
