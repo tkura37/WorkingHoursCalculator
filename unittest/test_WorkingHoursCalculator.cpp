@@ -95,16 +95,22 @@ TEST_F(WorkingHoursCalculatorTest, Test_subtractTime) {
     std::vector<TestCase_subtractTime> testCases_subtractTime = {
         /* timeA.hours > timeB.hours */
         {{9, 30}, {8, 00}, {1, 30}},    /* timeA.minutes > timeB.minutes */
+        {{10, 45}, {8, 15}, {2, 30}},
         {{9, 30}, {8, 30}, {1, 00}},    /* timeA.minutes = timeB.minutes */
+        {{10, 00}, {8, 00}, {2, 00}},
         {{9, 00}, {8, 30}, {0, 30}},    /* timeA.minutes < timeB.minutes */
+        {{10, 15}, {8, 45}, {1, 30}},
         /* timeA.hours = timeB.hours */
-        {{9, 30}, {9, 00}, {0, 30}},    /* timeA.minutes > timeB.minutes */
+        {{9, 45}, {9, 00}, {0, 45}},    /* timeA.minutes > timeB.minutes */
         {{9, 30}, {9, 30}, {0, 00}},    /* timeA.minutes = timeB.minutes */
-        {{9, 00}, {9, 30}, {0, -30}},   /* timeA.minutes < timeB.minutes */
+        {{9, 00}, {9, 15}, {0, -15}},   /* timeA.minutes < timeB.minutes */
         /* timeA.hours < timeB.hours */
         {{8, 30}, {9, 00}, {0, -30}},   /* timeA.minutes > timeB.minutes */
+        {{8, 15}, {10, 00}, {-1, 45}},
         {{8, 30}, {9, 30}, {-1, 00}},   /* timeA.minutes = timeB.minutes */
+        {{8, 30}, {10, 30}, {-2, 00}},
         {{8, 00}, {9, 30}, {-1, 30}},   /* timeA.minutes < timeB.minutes */
+        {{8, 15}, {10, 45}, {-2, 30}},
     };
 
     for (const auto& testCase : testCases_subtractTime) {
